@@ -7,6 +7,8 @@ export const proxy = async (c: Context) => {
     const isTestAssistant = messages[0]?.role === 'system' && messages[0]?.content === 'You are a test assistant.';
 
     if (!isTestAssistant) {
+        // This is an example of transforming the users question to be about dotnet core
+        // You could call out to just about anything here, a database, an external API etc to add additional context on the fly.
         const req = await c.env.AI.run("@cf/meta/llama-2-7b-chat-int8", {
             messages: [
                 { role: 'system', content: 'refrase the users question to be about dotnet core' },
@@ -14,10 +16,10 @@ export const proxy = async (c: Context) => {
             ]
         });
 
-        const context = req.response;
+        const additionalContext = req.response;
 
         // Append Cloudflare AI context to the last user message
-        messages[messages.length - 1].content += context;
+        messages[messages.length - 1].content += `\n\n${additionalContext}`;
     }
 
     // Call OpenAI API
